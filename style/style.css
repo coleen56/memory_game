@@ -1,0 +1,25 @@
+#jeu {
+    width: 50%;
+}
+
+#startBtn {
+    width: fit-content;
+}
+
+.carte {
+    border: 5px red solid;
+    height: 200px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    img {
+    
+        height: 100%;
+    }
+}

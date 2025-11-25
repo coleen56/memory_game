@@ -1,0 +1,97 @@
+import { Game } from "./Game.js";
+import { Card } from "./Card.js"
+import { Pair } from "./Pair.js"
+
+// initialisation du jeu
+const g = new Game();
+
+g.createCards();
+
+g.randomizeCards();
+
+// lancement du jeu
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("startBtn").addEventListener("click", function () {
+        startGame()
+    })
+})
+
+// affichage des cartes initial dans l'ihm
+function displayCards(cards) {
+    let html = ""
+    for (let i in cards) {
+        console.log(cards[i])
+        if (i % 4 == 0) {
+            html += "<div class=\"row\">"
+        }
+        html += "<div class=\"carte col-3 mb-2\" data-rank=\"" + i + "\"><img src=\"resources/images/blank.png\"></div>"
+        if (i % 4 == 3) {
+            html += "</div>"
+        }
+    }
+    return html;
+}
+
+function startGame() {
+    let first_img;
+    let sec_img;
+    let compteur = 0
+    // va stocker la paire de cartes selectionnées
+    let p;
+// flag qui permet de désactiver les reactions du listener sur les cartes si deux cartes sont retournées, pour éviter de retourner une troisième carte
+    let canClick = true;
+    showCount(0)
+    document.getElementById("jeu").innerHTML = displayCards(g.cards)
+    document.querySelectorAll(".carte").forEach(element => {
+        element.addEventListener("click", function () {
+            // ignore la reaction
+            if (!canClick) return;
+            // compteur verifie si la carte cliquée est la n°1 ou n°2
+            compteur++;
+            // recupère le numero de la carte 
+            let id = element.getAttribute("data-rank");
+            if (compteur == 1) {
+                // "retourne" la carte
+                first_img = element.querySelector("img");
+                first_img.setAttribute("src", g.cards[id].real_image)
+                p = new Pair();
+                // ajoute carte a la paire temporaire
+                p.firstCard = g.cards[id]
+            } else if (compteur == 2) {
+                // si deux cartes retournées, on désactive la reaction
+                canClick = false
+                sec_img = element.querySelector("img");
+                sec_img.setAttribute("src", g.cards[id].real_image)
+                // ajout de la deuxieme carte a la paire temporaire
+                p.secondCard = g.cards[id]
+                // réinitialise le compteur
+                compteur = 0;
+
+                // si les deux cartes de la paire son correctes, on l'ajout à la liste des paires faites par l'utilisateur
+                if (p.isCorrect()) {
+                    g.addCorrectPair(p)
+                } else {
+                    // sinon on retourne les cartes après 2sec et le jeu continue
+                    setTimeout(() => {
+                        first_img.setAttribute("src", "resources/images/blank.png")
+                        sec_img.setAttribute("src", "resources/images/blank.png")
+                        // reactivation des réactions
+                        canClick=true
+                    }, 2000);
+                }
+                g.incCount()
+                if(g.pairsMade.length == 8) {
+                    console.log("game ended with " + g.count + " tries")
+                }
+                // affichage du nombre d'essai
+                showCount(g.count)
+            }
+
+        })
+    });
+}
+
+// fonction qui affiche le nombre d'essais dans l'ihm
+function showCount(count) {
+    document.getElementById("count").innerText = count
+}
