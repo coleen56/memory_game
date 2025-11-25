@@ -15,9 +15,10 @@ export class Game {
     // crée les cartes et les ajoute au jeu
     createCards() {
         for(let i = 1; i <= 8; i++) {
-            let c = new Card(i, "resources/images/lego" + i + ".png")
-            this.cards.push(c)
-            this.cards.push(c)
+            let c1 = new Card(i, "resources/images/lego" + i + ".png")
+            let c2 = new Card(i, "resources/images/lego" + i + ".png")
+            this.cards.push(c1)
+            this.cards.push(c2)
         }
     }
 

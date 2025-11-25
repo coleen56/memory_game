@@ -1,5 +1,4 @@
 import { Game } from "./Game.js";
-import { Card } from "./Card.js"
 import { Pair } from "./Pair.js"
 
 let g = new Game();
@@ -22,13 +21,12 @@ function displayCards(cards) {
     container.innerHTML = "";
 
     cards.forEach(card => {
-        container.appendChild(card.render());
+        container.appendChild(card.render(g.cards.indexOf(card)));
     });
 }
 
 function startGame() {
-    let first_img;
-    let sec_img;
+    let firstCard;
     let compteur = 0
     // va stocker la paire de cartes selectionnées
     let p;
@@ -42,44 +40,59 @@ function startGame() {
     // affichage des cartes
     displayCards(g.cards)
 
-    console.log(g.cards)
-    document.querySelectorAll(".carte").forEach(element => {
+    const cardElements = document.querySelectorAll(".carte");
+
+    cardElements.forEach(element => {
         element.addEventListener("click", function () {
             // ignore la reaction
             if (!canClick) return;
+
             // compteur verifie si la carte cliquée est la n°1 ou n°2
             compteur++;
             // recupère le numero de la carte 
             let id = element.getAttribute("data-rank");
-            if (compteur == 1) {
-                // "retourne" la carte
-                first_img = element.querySelector("img");
-                first_img.setAttribute("src", g.cards[id].real_image)
+            const card = g.cards[id]
+
+            // on ignore si la carte est déjà retournée
+            if(card.isFlipped) return;
+
+            card.flip()
+            element.querySelector("img").src = card.display_image;
+
+            if (!firstCard) {
+                firstCard = card
                 p = new Pair();
-                // ajoute carte a la paire temporaire
-                p.firstCard = g.cards[id]
-            } else if (compteur == 2) {
+                p.firstCard = firstCard
+            } else {
                 // si deux cartes retournées, on désactive la reaction
                 canClick = false
-                sec_img = element.querySelector("img");
-                sec_img.setAttribute("src", g.cards[id].real_image)
+                const secondCard = card
+
+                // recupération des index des div pour recup les img et changer leur src
+                const firstIndex = g.cards.indexOf(firstCard);
+                const secondIndex = g.cards.indexOf(secondCard);
+
+                const firstImg = cardElements[firstIndex].querySelector("img");
+                const secondImg = cardElements[secondIndex].querySelector("img");
+
                 // ajout de la deuxieme carte a la paire temporaire
-                p.secondCard = g.cards[id]
-                // réinitialise le compteur
-                compteur = 0;
+                p.secondCard = secondCard
 
                 // si les deux cartes de la paire son correctes, on l'ajout à la liste des paires faites par l'utilisateur
                 if (p.isCorrect()) {
                     g.addCorrectPair(p)
                     canClick = true
                 } else {
-                    // sinon on retourne les cartes après 2sec et le jeu continue
+                    // sinon on retourne les cartes après 1.5sec et le jeu continue
                     setTimeout(() => {
-                        first_img.setAttribute("src", "resources/images/blank.png")
-                        sec_img.setAttribute("src", "resources/images/blank.png")
+                        // on retourne les deux cartes
+                        p.firstCard.flip()
+                        firstImg.src = p.firstCard.display_image
+                        p.secondCard.flip()
+                        secondImg.src = p.secondCard.display_image
                         // reactivation des réactions
                         canClick = true
-                    }, 2000);
+                    }, 1500);
                 }
                 g.incCount()
                 // affichage du nombre d'essai
@@ -88,8 +101,9 @@ function startGame() {
                 if (g.pairsMade.length == g.cards.length/2) {
                     stopGame()
                 }
-            }
 
+                firstCard = null
+            }
         })
     });
 }

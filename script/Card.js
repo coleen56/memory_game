@@ -17,16 +17,17 @@ export class Card {
         } else {
             this.display_image = "resources/images/blank.png";
         }
+
     }
 
     // affichage de la carte dans le dom
-    render() {
+    render(index) {
         let dom = document.createElement("div");
         dom.classList.add("carte", "col-3", "mb-2");
-        dom.setAttribute("data-rank", this.number)
+        dom.setAttribute("data-rank", index)
 
         let img = document.createElement("img");
-        img.src = "resources/images/blank.png";
+        img.src = this.display_image;
 
         dom.appendChild(img);
         return dom;
